@@ -57,8 +57,6 @@ class ViewSamaritansPoster extends GebSpec {
     }
 
     def 'View Samaritans Poster'() {
-        //setup
-
         given: 'that is content uploaded'
         uploadSamaritanImage()
 
