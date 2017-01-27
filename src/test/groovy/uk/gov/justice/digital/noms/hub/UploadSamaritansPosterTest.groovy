@@ -23,6 +23,7 @@ import static org.hamcrest.MatcherAssert.assertThat
 class UploadSamaritansPosterTest extends GebSpec {
     private static final String IMAGE_FILE_NAME = 'Listener caller awareness digi screens ENGLISH vB slide6.jpg'
     private static final String TITLE_STR = 'hub-function-test:Upload Samaritan Posters:-Automated Test - 1'
+    private static final String CATEGORY_STR = 'education'
 
     private String mongoDbUrl
     private String azurePublicUrlBase
@@ -59,6 +60,10 @@ class UploadSamaritansPosterTest extends GebSpec {
         $('form').title = TITLE_STR
         assertThat($('form').title, is(TITLE_STR))
 
+        and: 'provided a category'
+        $('form').category = CATEGORY_STR
+        assertThat($('form').category, is(CATEGORY_STR))
+
         when: 'I click Save'
         $('input[type=submit]').click()
 
@@ -67,6 +72,7 @@ class UploadSamaritansPosterTest extends GebSpec {
         Document document = mongoDatabase.getCollection('contentItem').find(new BasicDBObject(title: TITLE_STR)).first()
         assertThat(document, notNullValue())
         assertThat(document.containsValue(TITLE_STR), is(true))
+        assertThat(document.containsValue(CATEGORY_STR), is(true))
         assertThat(document.containsKey('uri'), is(true))
         assertThat(container.getBlockBlobReference(IMAGE_FILE_NAME).exists(), is(true))
     }
