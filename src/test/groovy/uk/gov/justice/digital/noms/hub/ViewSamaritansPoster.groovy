@@ -22,10 +22,6 @@ import static org.hamcrest.CoreMatchers.containsString
 import static org.hamcrest.CoreMatchers.is
 import static org.hamcrest.MatcherAssert.assertThat
 
-/**
- *
- * Placeholder for License.
- */
 @Slf4j
 class ViewSamaritansPoster extends GebSpec {
     private static final String IMAGE_FILE_NAME = 'Listener caller awareness digi screens ENGLISH vB slide6.jpg'
@@ -77,6 +73,7 @@ class ViewSamaritansPoster extends GebSpec {
                 .header('accept', 'application/json')
                 .field('title', TITLE_STR)
                 .field('file', file)
+                .field('category', 'education')
                 .asString();
         assertThat(response.getStatus(), is(HttpStatus.SC_CREATED));
     }

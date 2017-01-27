@@ -22,7 +22,7 @@ import static org.hamcrest.MatcherAssert.assertThat
 @Slf4j
 class UploadSamaritansPosterTest extends GebSpec {
     private static final String IMAGE_FILE_NAME = 'Listener caller awareness digi screens ENGLISH vB slide6.jpg'
-    public static final String TITLE_STR = 'hub-function-test:Upload Samaritan Posters:-Automated Test - 1'
+    private static final String TITLE_STR = 'hub-function-test:Upload Samaritan Posters:-Automated Test - 1'
 
     private String mongoDbUrl
     private String azurePublicUrlBase
