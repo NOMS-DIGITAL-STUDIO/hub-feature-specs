@@ -17,6 +17,7 @@ import groovy.util.logging.Slf4j
 import org.apache.http.HttpStatus
 
 import java.security.InvalidKeyException
+import java.util.concurrent.Callable
 
 import static org.hamcrest.CoreMatchers.containsString
 import static org.hamcrest.CoreMatchers.is
@@ -25,22 +26,19 @@ import static org.hamcrest.MatcherAssert.assertThat
 @Slf4j
 class ViewSamaritansPoster extends GebSpec {
     private static final String IMAGE_FILE_NAME = 'Listener caller awareness digi screens ENGLISH vB slide6.jpg'
-    public static final String TITLE_STR = 'hub-function-test:Upload Samaritan Posters:-Automated Test - 1'
+    private static final String TITLE_STR = 'hub-function-test:Upload Samaritan Posters:-Automated Test - 1'
+    private static final String AZURE_CONTAINER_NAME = "content-items"
 
     private String mongoDbUrl
-    private String azurePublicUrlBase
+    private String azureBlobStorePublicUrlBase
     private String adminRestUrl
     private String contentFeedAppUrl
-
     private File file
-
     private MongoDatabase mongoDatabase
-
-    private static final String AZURE_CONTAINER_NAME = "content-items"
     private CloudBlobContainer container
 
     def setup() {
-        file = new File(this.getClass().getResource('/' + IMAGE_FILE_NAME).toURI())
+        file = new File(this.getClass().getResource("/${IMAGE_FILE_NAME}").toURI())
         setAdminRestUrl()
         setContentFeedUrl()
         setupMongoDB()
@@ -60,16 +58,24 @@ class ViewSamaritansPoster extends GebSpec {
         go contentFeedAppUrl
 
         then: 'I see the last image uploaded'
-        assertThat($('h1').text(), is('Hub Content Feed'))
-        sleep(1000)
-        assertThat($('#uriId').text(), containsString('Listener caller awareness digi screens ENGLISH vB slide6'))
+        $('h1').text() == 'Hub Content Feed'
+        org.awaitility.Awaitility
+                .await().until(uriIdField(), containsString('Listener caller awareness digi screens ENGLISH vB slide6'))
 
         and: 'its most recent title'
-        assertThat($('#titleId').text(), is(TITLE_STR))
+        $('#titleId').text() == TITLE_STR
     }
 
-    private void uploadSamaritanImage() {
-        HttpResponse<String> response = Unirest.post(adminRestUrl+'/content-items')
+    private Callable<String> uriIdField() {
+        return new Callable<String>() {
+            public String call() throws Exception {
+                return $('#uriId').text()
+            }
+        };
+    }
+
+    def uploadSamaritanImage() {
+        HttpResponse<String> response = Unirest.post("${adminRestUrl}/${AZURE_CONTAINER_NAME}")
                 .header('accept', 'application/json')
                 .field('title', TITLE_STR)
                 .field('file', file)
@@ -78,9 +84,9 @@ class ViewSamaritansPoster extends GebSpec {
         assertThat(response.getStatus(), is(HttpStatus.SC_CREATED));
     }
 
-    private void setupMongoDB() {
+    def setupMongoDB() {
         mongoDbUrl = System.getenv('mongoDbUrl')
-        if(!mongoDbUrl) {
+        if (!mongoDbUrl) {
             mongoDbUrl = 'mongodb://localhost:27017'
             log.info('mongoDbUrl: local')
         }
@@ -88,23 +94,23 @@ class ViewSamaritansPoster extends GebSpec {
         mongoDatabase = mongoClient.getDatabase('hub_metadata')
     }
 
-    private void setAdminRestUrl() {
+    def setAdminRestUrl() {
         adminRestUrl = System.getenv('adminRestUrl')
-        if(!adminRestUrl) {
-            adminRestUrl =  'http://hub-admin.herokuapp.com/hub-admin/'
+        if (!adminRestUrl) {
+            adminRestUrl = 'http://hub-admin.herokuapp.com/hub-admin/'
             log.info('adminAppUrl: local')
         }
     }
 
-    private void setContentFeedUrl() {
+    def setContentFeedUrl() {
         contentFeedAppUrl = System.getenv('contentFeedAppUrl')
-        if(!contentFeedAppUrl) {
+        if (!contentFeedAppUrl) {
             contentFeedAppUrl = 'https://noms-digital-studio.github.io/hub-content-feed-ui/'
             log.info('contentFeedAppUrl: local')
         }
     }
 
-    private void setupAzureBlobStore() throws URISyntaxException, InvalidKeyException, StorageException {
+    def setupAzureBlobStore() throws URISyntaxException, InvalidKeyException, StorageException {
         setupAzurePublicUrlBase()
         container = setupAzureCloudStorageAcccount().createCloudBlobClient().getContainerReference(AZURE_CONTAINER_NAME)
         container.createIfNotExists()
@@ -114,23 +120,23 @@ class ViewSamaritansPoster extends GebSpec {
         container.uploadPermissions(containerPermissions)
     }
 
-    private void setupAzurePublicUrlBase() {
-        azurePublicUrlBase = System.getenv('azureBlobStorePublicUrlBase')
-        if (!azurePublicUrlBase) {
-            azurePublicUrlBase = 'http://digitalhub2.blob.core.windows.net'
-            log.info('azurePublicUrlBase: local')
+    def setupAzurePublicUrlBase() {
+        azureBlobStorePublicUrlBase = System.getenv('azureBlobStorePublicUrlBase')
+        if (!azureBlobStorePublicUrlBase) {
+            azureBlobStorePublicUrlBase = 'http://digitalhub2.blob.core.windows.net'
+            log.info('azureBlobStorePublicUrlBase: local')
         }
     }
 
-    private CloudStorageAccount setupAzureCloudStorageAcccount() {
-        String azureConnectionUri = System.getenv('azureBlobStoreConnUri')
-        if (!azureConnectionUri) {
+    def setupAzureCloudStorageAcccount() {
+        String azureBlobStoreConnUri = System.getenv('azureBlobStoreConnUri')
+        if (!azureBlobStoreConnUri) {
             throw new RuntimeException('azureBlobStoreConnUri environment variable was not set')
         }
-        CloudStorageAccount.parse(azureConnectionUri)
+        CloudStorageAccount.parse(azureBlobStoreConnUri)
     }
 
-    private void removeFileInMediaStore() throws URISyntaxException, StorageException {
+    def removeFileInMediaStore() throws URISyntaxException, StorageException {
         CloudBlockBlob blob = container.getBlockBlobReference(IMAGE_FILE_NAME)
         blob.deleteIfExists()
     }
