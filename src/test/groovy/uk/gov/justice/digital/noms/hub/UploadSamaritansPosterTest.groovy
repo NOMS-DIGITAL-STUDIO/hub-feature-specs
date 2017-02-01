@@ -40,6 +40,8 @@ class UploadSamaritansPosterTest extends GebSpec {
         setAdminUrl()
         setupMongoDB()
         setupAzureBlobStore()
+        go adminAppUrl
+        assertThat($('h1').text(), is('The Hub Admin UI'))
     }
 
     def cleanup() {
@@ -48,10 +50,6 @@ class UploadSamaritansPosterTest extends GebSpec {
     }
 
     def 'Upload Samaritan Posters'() {
-        setup:
-        go adminAppUrl
-        assertThat($('h1').text(), is('The Hub Admin UI'))
-
         given: 'that I have selected an image'
         $('form').file = file.absolutePath
         assertThat($('form').file, containsString(IMAGE_FILE_NAME))
