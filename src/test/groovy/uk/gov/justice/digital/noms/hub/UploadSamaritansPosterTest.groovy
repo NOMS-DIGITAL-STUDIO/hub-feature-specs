@@ -15,8 +15,10 @@ import groovy.util.logging.Slf4j
 import org.bson.Document
 
 import java.security.InvalidKeyException
+import java.util.concurrent.Callable
 
-import static org.hamcrest.CoreMatchers.*
+import static org.hamcrest.CoreMatchers.containsString
+import static org.hamcrest.CoreMatchers.is
 import static org.hamcrest.MatcherAssert.assertThat
 
 @Slf4j
@@ -24,15 +26,13 @@ class UploadSamaritansPosterTest extends GebSpec {
     private static final String IMAGE_FILE_NAME = 'Listener caller awareness digi screens ENGLISH vB slide6.jpg'
     private static final String TITLE_STR = 'hub-function-test:Upload Samaritan Posters:-Automated Test - 1'
     private static final String CATEGORY_STR = 'education'
+    private static final String AZURE_CONTAINER_NAME = "content-items"
 
     private String mongoDbUrl
     private String azurePublicUrlBase
     private String adminAppUrl
     private File file
-
     private MongoDatabase mongoDatabase
-
-    private static final String AZURE_CONTAINER_NAME = "content-items"
     private CloudBlobContainer container
 
     def setup() {
@@ -48,7 +48,7 @@ class UploadSamaritansPosterTest extends GebSpec {
     }
 
     def 'Upload Samaritan Posters'() {
-        //setup
+        setup:
         go adminAppUrl
         assertThat($('h1').text(), is('The Hub Admin UI'))
 
@@ -68,18 +68,29 @@ class UploadSamaritansPosterTest extends GebSpec {
         $('input[type=submit]').click()
 
         then: 'the image and title are published'
-        sleep(1000)
+        org.awaitility.Awaitility.await().until(theDataIsPresentInMongo())
+
         Document document = mongoDatabase.getCollection('contentItem').find(new BasicDBObject(title: TITLE_STR)).first()
-        assertThat(document, notNullValue())
-        assertThat(document.containsValue(TITLE_STR), is(true))
-        assertThat(document.containsValue(CATEGORY_STR), is(true))
-        assertThat(document.containsKey('uri'), is(true))
-        assertThat(container.getBlockBlobReference(IMAGE_FILE_NAME).exists(), is(true))
+        document != null
+        document.title == TITLE_STR
+        document.category == CATEGORY_STR
+        document.uri == azurePublicUrlBase + '/content-items/' + IMAGE_FILE_NAME
+        container.getBlockBlobReference(IMAGE_FILE_NAME).exists()
     }
 
-    private void setupMongoDB() {
+    def theDataIsPresentInMongo() {
+        return new Callable<Boolean>() {
+            Boolean call() throws Exception {
+                Document document = mongoDatabase.getCollection('contentItem')
+                                                 .find(new BasicDBObject(title: TITLE_STR)).first()
+                return document != null
+            }
+        }
+    }
+
+    def setupMongoDB() {
         mongoDbUrl = System.getenv('mongoDbUrl')
-        if(!mongoDbUrl) {
+        if (!mongoDbUrl) {
             mongoDbUrl = 'mongodb://localhost:27017'
             log.info('mongoDbUrl: local')
         }
@@ -87,15 +98,15 @@ class UploadSamaritansPosterTest extends GebSpec {
         mongoDatabase = mongoClient.getDatabase('hub_metadata')
     }
 
-    private void setAdminUrl() {
+    def setAdminUrl() {
         adminAppUrl = System.getenv('adminAppUrl')
-        if(!adminAppUrl) {
+        if (!adminAppUrl) {
             adminAppUrl = 'https://noms-digital-studio.github.io/hub-admin-ui/'
             log.info('adminAppUrl: local')
         }
     }
 
-    private void setupAzureBlobStore() throws URISyntaxException, InvalidKeyException, StorageException {
+    def setupAzureBlobStore() throws URISyntaxException, InvalidKeyException, StorageException {
         setupAzurePublicUrlBase()
         container = setupAzureCloudStorageAcccount().createCloudBlobClient().getContainerReference(AZURE_CONTAINER_NAME)
         container.createIfNotExists()
@@ -105,7 +116,7 @@ class UploadSamaritansPosterTest extends GebSpec {
         container.uploadPermissions(containerPermissions)
     }
 
-    private void setupAzurePublicUrlBase() {
+    def setupAzurePublicUrlBase() {
         azurePublicUrlBase = System.getenv('azureBlobStorePublicUrlBase')
         if (!azurePublicUrlBase) {
             azurePublicUrlBase = 'http://digitalhub2.blob.core.windows.net'
@@ -113,7 +124,7 @@ class UploadSamaritansPosterTest extends GebSpec {
         }
     }
 
-    private CloudStorageAccount setupAzureCloudStorageAcccount() {
+    def setupAzureCloudStorageAcccount() {
         String azureConnectionUri = System.getenv('azureBlobStoreConnUri')
         if (!azureConnectionUri) {
             throw new RuntimeException('azureBlobStoreConnUri environment variable was not set')
@@ -121,7 +132,7 @@ class UploadSamaritansPosterTest extends GebSpec {
         CloudStorageAccount.parse(azureConnectionUri)
     }
 
-    private void removeFileInMediaStore() throws URISyntaxException, StorageException {
+    def removeFileInMediaStore() throws URISyntaxException, StorageException {
         CloudBlockBlob blob = container.getBlockBlobReference(IMAGE_FILE_NAME)
         blob.deleteIfExists()
     }
