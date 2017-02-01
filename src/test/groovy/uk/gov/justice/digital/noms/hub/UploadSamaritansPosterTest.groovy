@@ -27,16 +27,17 @@ class UploadSamaritansPosterTest extends GebSpec {
     private static final String TITLE_STR = 'hub-function-test:Upload Samaritan Posters:-Automated Test - 1'
     private static final String CATEGORY_STR = 'education'
     private static final String AZURE_CONTAINER_NAME = "content-items"
+    private static final String CONTENT_ITEM_COLLECTION = 'contentItem'
 
     private String mongoDbUrl
-    private String azurePublicUrlBase
+    private String azureBlobStorePublicUrlBase
     private String adminAppUrl
     private File file
     private MongoDatabase mongoDatabase
     private CloudBlobContainer container
 
     def setup() {
-        file = new File(this.getClass().getResource('/' + IMAGE_FILE_NAME).toURI())
+        file = new File(this.getClass().getResource("/${IMAGE_FILE_NAME}").toURI())
         setAdminUrl()
         setupMongoDB()
         setupAzureBlobStore()
@@ -45,7 +46,7 @@ class UploadSamaritansPosterTest extends GebSpec {
     }
 
     def cleanup() {
-        mongoDatabase.getCollection('contentItem').deleteMany(new BasicDBObject(title: TITLE_STR))
+        mongoDatabase.getCollection(CONTENT_ITEM_COLLECTION).deleteMany(new BasicDBObject(title: TITLE_STR))
         removeFileInMediaStore()
     }
 
@@ -68,18 +69,18 @@ class UploadSamaritansPosterTest extends GebSpec {
         then: 'the image and title are published'
         org.awaitility.Awaitility.await().until(theDataIsPresentInMongo())
 
-        Document document = mongoDatabase.getCollection('contentItem').find(new BasicDBObject(title: TITLE_STR)).first()
+        Document document = mongoDatabase.getCollection(CONTENT_ITEM_COLLECTION).find(new BasicDBObject(title: TITLE_STR)).first()
         document != null
         document.title == TITLE_STR
         document.category == CATEGORY_STR
-        document.uri == azurePublicUrlBase + '/content-items/' + IMAGE_FILE_NAME
+        document.uri == "${azureBlobStorePublicUrlBase}/${AZURE_CONTAINER_NAME}/${IMAGE_FILE_NAME}"
         container.getBlockBlobReference(IMAGE_FILE_NAME).exists()
     }
 
     def theDataIsPresentInMongo() {
         return new Callable<Boolean>() {
             Boolean call() throws Exception {
-                Document document = mongoDatabase.getCollection('contentItem')
+                Document document = mongoDatabase.getCollection(CONTENT_ITEM_COLLECTION)
                                                  .find(new BasicDBObject(title: TITLE_STR)).first()
                 return document != null
             }
@@ -106,7 +107,7 @@ class UploadSamaritansPosterTest extends GebSpec {
 
     def setupAzureBlobStore() throws URISyntaxException, InvalidKeyException, StorageException {
         setupAzurePublicUrlBase()
-        container = setupAzureCloudStorageAcccount().createCloudBlobClient().getContainerReference(AZURE_CONTAINER_NAME)
+        container = setupAzureCloudStorageAccount().createCloudBlobClient().getContainerReference(AZURE_CONTAINER_NAME)
         container.createIfNotExists()
 
         BlobContainerPermissions containerPermissions = new BlobContainerPermissions()
@@ -115,14 +116,14 @@ class UploadSamaritansPosterTest extends GebSpec {
     }
 
     def setupAzurePublicUrlBase() {
-        azurePublicUrlBase = System.getenv('azureBlobStorePublicUrlBase')
-        if (!azurePublicUrlBase) {
-            azurePublicUrlBase = 'http://digitalhub2.blob.core.windows.net'
-            log.info('azurePublicUrlBase: local')
+        azureBlobStorePublicUrlBase = System.getenv('azureBlobStorePublicUrlBase')
+        if (!azureBlobStorePublicUrlBase) {
+            azureBlobStorePublicUrlBase = 'http://digitalhub2.blob.core.windows.net'
+            log.info('azureBlobStorePublicUrlBase: local')
         }
     }
 
-    def setupAzureCloudStorageAcccount() {
+    def setupAzureCloudStorageAccount() {
         String azureConnectionUri = System.getenv('azureBlobStoreConnUri')
         if (!azureConnectionUri) {
             throw new RuntimeException('azureBlobStoreConnUri environment variable was not set')
