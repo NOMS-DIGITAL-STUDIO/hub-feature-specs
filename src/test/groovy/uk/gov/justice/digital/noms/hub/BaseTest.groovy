@@ -24,7 +24,7 @@ class BaseTest extends GebSpec {
 
     protected String mongoDbUrl
     protected String azureBlobStorePublicUrlBase
-    protected String adminAppUrl
+    protected String adminUiUrl
     protected MongoDatabase mongoDatabase
     protected CloudBlobContainer container
 
@@ -33,7 +33,7 @@ class BaseTest extends GebSpec {
         setAdminUrl()
         setupMongoDB()
         setupAzureBlobStore()
-        go adminAppUrl
+        go adminUiUrl
     }
 
     def setupMongoDB() {
@@ -47,9 +47,9 @@ class BaseTest extends GebSpec {
     }
 
     def setAdminUrl() {
-        adminAppUrl = System.getenv('adminAppUrl')
-        if (!adminAppUrl) {
-            adminAppUrl = 'http://hub-admin-ui.herokuapp.com/'
+        adminUiUrl = System.getenv('adminUiUrl')
+        if (!adminUiUrl) {
+            adminUiUrl = 'http://hub-admin-ui.herokuapp.com/'
         }
     }
 

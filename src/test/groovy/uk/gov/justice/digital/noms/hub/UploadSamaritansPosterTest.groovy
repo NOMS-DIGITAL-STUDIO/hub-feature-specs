@@ -48,8 +48,8 @@ class UploadSamaritansPosterTest extends BaseTest {
     }
 
     def cleanup() {
-        removeDocumentFromMongoDbWithFilename(IMAGE_FILE_NAME)
-        removeFileFromMediaStoreWithFilename(IMAGE_FILE_NAME)
+        removeDocumentFromMongoDbWithFilename IMAGE_FILE_NAME
+        removeFileFromMediaStoreWithFilename IMAGE_FILE_NAME
     }
 
 }

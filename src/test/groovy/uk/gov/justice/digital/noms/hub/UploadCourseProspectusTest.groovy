@@ -4,8 +4,16 @@ import com.mongodb.BasicDBObject
 import groovy.util.logging.Slf4j
 import org.bson.Document
 
-import static org.awaitility.Awaitility.await
+import java.util.concurrent.Callable
 
+import static org.awaitility.Awaitility.await
+import static org.hamcrest.CoreMatchers.containsString
+
+/**
+ * HUB-74 Upload course prospectus
+ * HUB-77 Course information
+ * HUB-78 Group prospectuses
+ */
 @Slf4j
 class UploadCourseProspectusTest extends BaseTest {
     private static final String PDF_FILE_NAME = 'MEng Mathematics and Computer Science.pdf'
@@ -35,7 +43,7 @@ class UploadCourseProspectusTest extends BaseTest {
         $('#upload').click()
 
         then: 'the prospectus is published'
-        await().until(documentIsPresentInMongoDbWithFilename(PDF_FILE_NAME))
+        await().until(uploadSuccess(), containsString('Saved successfully'))
 
         Document document = mongoDatabase.getCollection(CONTENT_ITEM_COLLECTION).find(new BasicDBObject(filename: PDF_FILE_NAME)).first()
         document != null
@@ -44,6 +52,14 @@ class UploadCourseProspectusTest extends BaseTest {
         document.uri == "${azureBlobStorePublicUrlBase}/${AZURE_CONTAINER_NAME}/${PDF_FILE_NAME}"
 
         container.getBlockBlobReference(PDF_FILE_NAME).exists()
+    }
+
+    private Callable<String> uploadSuccess() {
+        return new Callable<String>() {
+            String call() throws Exception {
+                return $('#uploadSuccess').text()
+            }
+        }
     }
 
     def cleanup() {
