@@ -19,6 +19,7 @@ import org.apache.http.HttpStatus
 import java.security.InvalidKeyException
 import java.util.concurrent.Callable
 
+import static org.awaitility.Awaitility.await
 import static org.hamcrest.CoreMatchers.containsString
 import static org.hamcrest.CoreMatchers.is
 import static org.hamcrest.MatcherAssert.assertThat
@@ -59,8 +60,7 @@ class ViewSamaritansPoster extends GebSpec {
 
         then: 'I see the last image uploaded'
         $('h1').text() == 'Hub Content Feed'
-        org.awaitility.Awaitility
-                .await().until(uriIdField(), containsString('Listener caller awareness digi screens ENGLISH vB slide6'))
+        await().until(uriIdField(), containsString('Listener caller awareness digi screens ENGLISH vB slide6'))
 
         and: 'its most recent title'
         $('#titleId').text() == TITLE_STR
@@ -68,10 +68,10 @@ class ViewSamaritansPoster extends GebSpec {
 
     private Callable<String> uriIdField() {
         return new Callable<String>() {
-            public String call() throws Exception {
+            String call() throws Exception {
                 return $('#uriId').text()
             }
-        };
+        }
     }
 
     def uploadSamaritanImage() {
@@ -80,8 +80,8 @@ class ViewSamaritansPoster extends GebSpec {
                 .field('title', TITLE_STR)
                 .field('file', file)
                 .field('category', 'education')
-                .asString();
-        assertThat(response.getStatus(), is(HttpStatus.SC_CREATED));
+                .asString()
+        assertThat(response.getStatus(), is(HttpStatus.SC_CREATED))
     }
 
     def setupMongoDB() {
