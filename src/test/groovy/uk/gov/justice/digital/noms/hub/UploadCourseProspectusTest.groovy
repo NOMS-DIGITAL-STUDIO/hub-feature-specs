@@ -32,7 +32,7 @@ class UploadCourseProspectusTest extends BaseTest {
         $('form').prospectusFile = file.absolutePath
 
         when: 'I click Save'
-        $('input[type=submit]').click()
+        $('#upload').click()
 
         then: 'the prospectus is published'
         await().until(documentIsPresentInMongoDbWithFilename(PDF_FILE_NAME))
