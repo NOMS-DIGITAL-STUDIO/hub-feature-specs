@@ -8,10 +8,10 @@ import spock.lang.Ignore
 import static org.awaitility.Awaitility.await
 
 @Slf4j
-class UploadSamaritansPosterTest extends BaseTest {
-    private static final String IMAGE_FILE_NAME = 'Listener caller awareness digi screens ENGLISH vB slide6.jpg'
-    private static final String TITLE_STR = 'hub-feature-tests:Upload Samaritan Posters:-Automated Test - 1'
-    private static final String CATEGORY_STR = 'education'
+class UploadSamaritansPosterSpec extends BaseSpec {
+    private static final String IMAGE_FILE_NAME = 'hub-feature-specs-test-image.jpg'
+    private static final String TITLE = 'hub-feature-specs:Upload Samaritan Posters:-Automated Test - 1'
+    private static final String CATEGORY = 'education'
 
     private File file
 
@@ -26,23 +26,23 @@ class UploadSamaritansPosterTest extends BaseTest {
         assert $('form').file.contains(IMAGE_FILE_NAME)
 
         and: 'provided a title'
-        $('form').title = TITLE_STR
-        assert $('form').title == TITLE_STR
+        $('form').title = TITLE
+        assert $('form').title == TITLE
 
         and: 'provided a category'
-        $('form').category = CATEGORY_STR
-        assert $('form').category == CATEGORY_STR
+        $('form').category = CATEGORY
+        assert $('form').category == CATEGORY
 
         when: 'I click Save'
         $('input[type=submit]').click()
 
         then: 'the image and title are published'
-        await().until(documentIsPresentInMongoDbWithFilename(IMAGE_FILE_NAME))
+        await().until{ documentIsPresentInMongoDbWithFilename IMAGE_FILE_NAME }
 
-        Document document = mongoDatabase.getCollection(CONTENT_ITEM_COLLECTION).find(new BasicDBObject(title: TITLE_STR)).first()
+        Document document = mongoDatabase.getCollection(CONTENT_ITEM_COLLECTION).find(new BasicDBObject(title: TITLE)).first()
         document != null
-        document.title == TITLE_STR
-        document.category == CATEGORY_STR
+        document.title == TITLE
+        document.category == CATEGORY
         document.uri == "${azureBlobStorePublicUrlBase}/${AZURE_CONTAINER_NAME}/${IMAGE_FILE_NAME}"
         container.getBlockBlobReference(IMAGE_FILE_NAME).exists()
     }
