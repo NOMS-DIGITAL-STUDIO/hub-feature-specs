@@ -1,21 +1,30 @@
 package uk.gov.justice.digital.noms.hub
 
 import com.mongodb.BasicDBObject
+import geb.spock.GebSpec
 import groovy.util.logging.Slf4j
 import org.bson.Document
 import spock.lang.Ignore
+import uk.gov.justice.digital.noms.hub.util.MediaStore
+import uk.gov.justice.digital.noms.hub.util.MetadataStore
 
 import static org.awaitility.Awaitility.await
+import static MediaStore.AZURE_CONTAINER_NAME
+import static MetadataStore.CONTENT_ITEM_COLLECTION
 
 @Slf4j
-class UploadSamaritansPosterSpec extends BaseSpec {
+class UploadSamaritansPosterSpec extends GebSpec {
     private static final String IMAGE_FILE_NAME = 'hub-feature-specs-test-image.jpg'
     private static final String TITLE = 'hub-feature-specs:Upload Samaritan Posters:-Automated Test - 1'
     private static final String CATEGORY = 'education'
 
     private File file
+    private MetadataStore metadataStore = new MetadataStore()
+    private MediaStore mediaStore = new MediaStore()
 
     def setup() {
+        metadataStore.connect()
+        mediaStore.connect()
         file = new File(this.getClass().getResource("/${IMAGE_FILE_NAME}").toURI())
     }
 
@@ -37,19 +46,19 @@ class UploadSamaritansPosterSpec extends BaseSpec {
         $('input[type=submit]').click()
 
         then: 'the image and title are published'
-        await().until{ documentIsPresentInMongoDbWithFilename IMAGE_FILE_NAME }
+        await().until{ metadataStore.documentIsPresentWithFilename IMAGE_FILE_NAME }
 
-        Document document = mongoDatabase.getCollection(CONTENT_ITEM_COLLECTION).find(new BasicDBObject(title: TITLE)).first()
+        Document document = metadataStore.database.getCollection(CONTENT_ITEM_COLLECTION).find(new BasicDBObject(title: TITLE)).first()
         document != null
         document.title == TITLE
         document.category == CATEGORY
-        document.uri == "${azureBlobStorePublicUrlBase}/${AZURE_CONTAINER_NAME}/${IMAGE_FILE_NAME}"
+        document.uri == "${mediaStore.mediaStorePublicUrlBase}/${AZURE_CONTAINER_NAME}/${IMAGE_FILE_NAME}"
         container.getBlockBlobReference(IMAGE_FILE_NAME).exists()
     }
 
     def cleanup() {
-        removeDocumentFromMongoDbWithFilename IMAGE_FILE_NAME
-        removeFileFromMediaStoreWithFilename IMAGE_FILE_NAME
+        metadataStore.removeDocumentsWithFilenames IMAGE_FILE_NAME
+        mediaStore.removeContentWithFilenames IMAGE_FILE_NAME
     }
 
 }

@@ -2,20 +2,27 @@ package uk.gov.justice.digital.noms.hub
 
 import com.mashape.unirest.http.HttpResponse
 import com.mashape.unirest.http.Unirest
+import geb.spock.GebSpec
 import groovy.util.logging.Slf4j
 import spock.lang.Ignore
+import uk.gov.justice.digital.noms.hub.util.MediaStore
+import uk.gov.justice.digital.noms.hub.util.MetadataStore
 
 import static org.apache.http.HttpStatus.SC_CREATED
 import static org.awaitility.Awaitility.await
 
 @Slf4j
-class ViewSamaritansPosterSpec extends BaseSpec {
+class ViewSamaritansPosterSpec extends GebSpec {
     private static final String IMAGE_FILE_NAME = 'hub-feature-specs-test-image.jpg'
     private static final String TITLE = 'hub-feature-specs:Upload Samaritan Posters:-Automated Test - 1'
 
     private File file
+    private MetadataStore metadataStore = new MetadataStore()
+    private MediaStore mediaStore = new MediaStore()
 
     def setup() {
+        metadataStore.connect()
+        mediaStore.connect()
         file = new File(this.getClass().getResource("/${IMAGE_FILE_NAME}").toURI())
     }
 
@@ -46,7 +53,7 @@ class ViewSamaritansPosterSpec extends BaseSpec {
     }
 
     def cleanup() {
-        removeDocumentFromMongoDbWithFilename IMAGE_FILE_NAME
-        removeFileFromMediaStoreWithFilename IMAGE_FILE_NAME
+        metadataStore.removeDocumentsWithFilenames IMAGE_FILE_NAME
+        mediaStore.removeContentWithFilenames IMAGE_FILE_NAME
     }
 }
