@@ -17,8 +17,10 @@ class BrowserProspectusesSpec extends BaseSpec {
 
     private File file1
     private File file2
+    private MongoUtils mongoUtils = new MongoUtils()
 
     def setup() {
+        mongoUtils.connectToDb()
         file1 = new File(this.getClass().getResource("/${PDF_FILENAME_1}").toURI())
         file2 = new File(this.getClass().getResource("/${PDF_FILENAME_2}").toURI())
     }
@@ -26,11 +28,11 @@ class BrowserProspectusesSpec extends BaseSpec {
     def 'Browse Prospectuses'() {
         given: 'At least one prospectus already exists'
         uploadProspectus(file1, TITLE_1)
-        await().until{ documentIsPresentInMongoDbWithFilename(PDF_FILENAME_1) }
+        await().until{ mongoUtils.documentIsPresentWithFilename(PDF_FILENAME_1) }
 
         and: 'I upload a second one'
         uploadProspectus file2, TITLE_2
-        await().until{ documentIsPresentInMongoDbWithFilename(PDF_FILENAME_2) }
+        await().until{ mongoUtils.documentIsPresentWithFilename(PDF_FILENAME_2) }
 
         when: 'I view the hub admin ui'
         go adminUiUrl
@@ -53,7 +55,7 @@ class BrowserProspectusesSpec extends BaseSpec {
     }
 
     def cleanup() {
-        removeDocumentFromMongoDbWithFilename PDF_FILENAME_1, PDF_FILENAME_2
+        mongoUtils.removeDocumentWithFilename PDF_FILENAME_1, PDF_FILENAME_2
         removeFileFromMediaStoreWithFilename PDF_FILENAME_1, PDF_FILENAME_2
     }
 

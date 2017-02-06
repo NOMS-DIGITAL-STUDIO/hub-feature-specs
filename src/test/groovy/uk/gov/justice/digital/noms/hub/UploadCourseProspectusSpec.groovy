@@ -13,8 +13,10 @@ class UploadCourseProspectusSpec extends BaseSpec {
     private static final String CATEGORY = 'Science'
 
     private File file
+    private MongoUtils mongoUtils = new MongoUtils()
 
     def setup() {
+        mongoUtils.connectToDb()
         file = new File(this.getClass().getResource("/${PDF_FILENAME}").toURI())
     }
 
@@ -37,7 +39,7 @@ class UploadCourseProspectusSpec extends BaseSpec {
         await().until{ $('#uploadSuccess').text() == 'Saved successfully' }
 
         then: 'the prospectus is published'
-        Document document = mongoDatabase.getCollection(CONTENT_ITEM_COLLECTION)
+        Document document = mongoUtils.mongoDatabase.getCollection(mongoUtils.CONTENT_ITEM_COLLECTION)
                                 .find(new BasicDBObject(filename: PDF_FILENAME)).first()
         document != null
         document.title == TITLE
@@ -52,7 +54,7 @@ class UploadCourseProspectusSpec extends BaseSpec {
     }
 
     def cleanup() {
-        removeDocumentFromMongoDbWithFilename PDF_FILENAME
+        mongoUtils.documentIsPresentWithFilename PDF_FILENAME
         removeFileFromMediaStoreWithFilename PDF_FILENAME
     }
 
