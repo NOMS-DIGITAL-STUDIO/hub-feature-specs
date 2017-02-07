@@ -19,11 +19,14 @@ class ViewSamaritansPosterSpec extends GebSpec {
     private File file
     private MetadataStore metadataStore = new MetadataStore()
     private MediaStore mediaStore = new MediaStore()
+    private String userName
+    private String password
 
     def setup() {
         metadataStore.connect()
         mediaStore.connect()
         file = new File(this.getClass().getResource("/${IMAGE_FILE_NAME}").toURI())
+        setupBasicAuth()
     }
 
     @Ignore('A future feature that was supported in the walking skeleton')
@@ -48,8 +51,19 @@ class ViewSamaritansPosterSpec extends GebSpec {
                 .field('title', TITLE)
                 .field('file', file)
                 .field('category', 'education')
+                .basicAuth(userName, password)
                 .asString()
         assert response.getStatus() == SC_CREATED
+    }
+
+    def setupBasicAuth() {
+        String basicAuth = System.getenv('BASIC_AUTH')
+        if(!basicAuth) {
+            basicAuth = 'user:password'
+        }
+        String[] stringArr =  basicAuth.split(':')
+        userName = stringArr[0];
+        password = stringArr[1];
     }
 
     def cleanup() {
