@@ -11,7 +11,7 @@ import static org.apache.http.HttpStatus.SC_CREATED
 import static org.awaitility.Awaitility.await
 
 @Slf4j
-class BrowserProspectusesSpec extends GebSpec {
+class BrowseProspectusesSpec extends GebSpec {
     private static final String PDF_FILENAME_1 = 'hub-feature-specs-test-prospectus1.pdf'
     private static final String PDF_FILENAME_2 = 'hub-feature-specs-test-prospectus2.pdf'
     private static final String TITLE_1 = 'hub-feature-specs:Upload Course Prospectus One'
