@@ -25,11 +25,12 @@ class BrowserProspectusesSpec extends GebSpec {
     private String adminUiUrl
     private String userName
     private String password
+    private String basicAuth
 
     def setup() {
         metadataStore.connect()
         mediaStore.connect()
-        adminUiUrl = System.getenv('adminUiUrl') ?: 'http://localhost:3000/'
+        adminUiUrl = (System.getenv('adminUiUrl') ?: "http://localhost:3000/").replaceFirst('http://', "http://{$basicAuth}@")
         setupBasicAuth()
         file1 = new File(this.getClass().getResource("/${PDF_FILENAME_1}").toURI())
         file2 = new File(this.getClass().getResource("/${PDF_FILENAME_2}").toURI())
@@ -66,7 +67,7 @@ class BrowserProspectusesSpec extends GebSpec {
     }
 
     def setupBasicAuth() {
-        String basicAuth = System.getenv('BASIC_AUTH')
+        basicAuth = System.getenv('BASIC_AUTH')
         if(!basicAuth) {
             basicAuth = 'user:password'
         }
