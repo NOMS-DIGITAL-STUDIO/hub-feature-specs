@@ -21,11 +21,16 @@ class UploadCourseProspectusSpec extends GebSpec {
     private MetadataStore metadataStore = new MetadataStore()
     private MediaStore mediaStore = new MediaStore()
     private String adminUiUrl
+    private String userName
+    private String password
+    private String basicAuth
 
     def setup() {
         metadataStore.connect()
         mediaStore.connect()
-        adminUiUrl = System.getenv('adminUiUrl') ?: 'http://localhost:3000/'
+        setupBasicAuth()
+        adminUiUrl = (System.getenv('adminUiUrl') ?: "http://localhost:3000/").replaceFirst('http://', "http://${basicAuth}@")
+
         file = new File(this.getClass().getResource("/${PDF_FILENAME}").toURI())
     }
 
@@ -60,6 +65,13 @@ class UploadCourseProspectusSpec extends GebSpec {
 
     private void verifyThatTheCurrentPageTitleIs(String aTitle) {
         assert title == aTitle
+    }
+
+    def setupBasicAuth() {
+        basicAuth = System.getenv('BASIC_AUTH') ?: 'user:password'
+        String[] credentials =  basicAuth.split(':')
+        userName = credentials[0];
+        password = credentials[1];
     }
 
     def cleanup() {

@@ -68,13 +68,10 @@ class BrowseProspectusesSpec extends GebSpec {
     }
 
     def setupBasicAuth() {
-        basicAuth = System.getenv('BASIC_AUTH')
-        if(!basicAuth) {
-            basicAuth = 'user:password'
-        }
-        String[] stringArr =  basicAuth.split(':')
-        userName = stringArr[0];
-        password = stringArr[1];
+        basicAuth = System.getenv('BASIC_AUTH') ?: 'user:password'
+        String[] credentials =  basicAuth.split(':')
+        userName = credentials[0];
+        password = credentials[1];
     }
 
     def cleanup() {
