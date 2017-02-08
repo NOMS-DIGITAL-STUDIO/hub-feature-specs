@@ -31,7 +31,7 @@ class BrowserProspectusesSpec extends GebSpec {
         metadataStore.connect()
         mediaStore.connect()
         setupBasicAuth()
-        adminUiUrl = (System.getenv('adminUiUrl') ?: "http://localhost:3000/").replaceFirst('http://', "http://{$basicAuth}@")
+        adminUiUrl = (System.getenv('adminUiUrl') ?: "http://localhost:3000/").replaceFirst('http://', "http://${basicAuth}@")
 
         file1 = new File(this.getClass().getResource("/${PDF_FILENAME_1}").toURI())
         file2 = new File(this.getClass().getResource("/${PDF_FILENAME_2}").toURI())
