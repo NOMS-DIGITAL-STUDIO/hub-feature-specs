@@ -40,13 +40,13 @@ class UploadCourseProspectusSpec extends GebSpec {
         verifyThatTheCurrentPageTitleIs('Upload - Prospectus')
 
         and: 'have provided a title'
-        $('form').prospectusTitle = TITLE
+        $('form').title = TITLE
 
         and: 'picked a subject'
-        $('form').prospectusSubject = CATEGORY
+        $('form').category = CATEGORY
 
         and: 'and chosen a prospectus'
-        $('form').prospectusFile = file.absolutePath
+        $('form').mainFile = file.absolutePath
 
         when: 'I click the Save button'
         $('#upload').click()

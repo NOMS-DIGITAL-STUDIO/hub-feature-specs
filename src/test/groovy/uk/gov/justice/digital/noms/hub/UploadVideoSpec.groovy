@@ -40,13 +40,13 @@ class UploadVideoSpec extends GebSpec {
         verifyThatTheCurrentPageTitleIs('Upload - Video')
 
         and: 'have provided a title'
-        $('form').videoTitle = TITLE
+        $('form').title = TITLE
 
         and: 'picked a subject'
-        $('form').videoSubject = CATEGORY
+        $('form').category = CATEGORY
 
         and: 'and chosen a video'
-        $('form').videoFile = file.absolutePath
+        $('form').mainFile = file.absolutePath
 
         when: 'I click the Save button'
         $('#upload').click()
