@@ -22,6 +22,7 @@ class BrowseProspectusesSpec extends GebSpec {
     private File file2
     private MetadataStore metadataStore = new MetadataStore()
     private MediaStore mediaStore = new MediaStore()
+    private String adminUrl
     private String adminUiUrl
     private String userName
     private String password
@@ -31,6 +32,7 @@ class BrowseProspectusesSpec extends GebSpec {
         metadataStore.connect()
         mediaStore.connect()
         setupBasicAuth()
+        adminUrl = (System.getenv('adminUrl') ?: "http://localhost:8080/").replaceFirst('http://', "http://${basicAuth}@")
         adminUiUrl = (System.getenv('adminUiUrl') ?: "http://localhost:3000/").replaceFirst('http://', "http://${basicAuth}@")
 
         file1 = new File(this.getClass().getResource("/${PDF_FILENAME_1}").toURI())
@@ -60,7 +62,7 @@ class BrowseProspectusesSpec extends GebSpec {
 
         def metadata = """{"title":"${title}", "category":"${CATEGORY}", "mediaType":"application/pdf"}"""
 
-        HttpResponse<String> response = Unirest.post("http://hub-admin.herokuapp.com/hub-admin/content-items")
+        HttpResponse<String> response = Unirest.post(adminUrl + "/hub-admin/content-items")
                 .header('accept', 'application/json')
                 .field('file', file)
                 .field('metadata', metadata)
