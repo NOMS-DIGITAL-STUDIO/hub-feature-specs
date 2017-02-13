@@ -1,7 +1,7 @@
-hub-function-test
+hub-feature-specs
 ====
 
-Functional Test Project for the Hub.
+Feature specifications for the Hub.
  
 Ministry of Justice.
 National Offender Management Service.
@@ -11,7 +11,7 @@ Machine Setup
 
 Ensure phantomjs has been installed.
 
-Environment variable required by the functional tests
+Environment variable required by the tests
 ----
 ```
 azureBlobStoreConnUri - The Azure blob store connection string. 

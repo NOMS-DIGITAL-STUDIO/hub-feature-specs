@@ -1,4 +1,4 @@
-description = 'hub functional test'
+description = 'hub feature specs'
 
 apply plugin: 'idea'
 apply plugin: 'groovy'
