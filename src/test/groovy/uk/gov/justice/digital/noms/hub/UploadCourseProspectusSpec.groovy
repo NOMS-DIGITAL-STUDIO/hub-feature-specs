@@ -56,8 +56,8 @@ class UploadCourseProspectusSpec extends GebSpec {
         Document document = metadataStore.getDatabase().getCollection(CONTENT_ITEM_COLLECTION)
                                 .find(new BasicDBObject(filename: PDF_FILENAME)).first()
         document != null
-        document.title == TITLE
-        document.category == CATEGORY
+        document.metadata.title == TITLE
+        document.metadata.category == CATEGORY
         document.uri == "${mediaStore.getMediaStorePublicUrlBase()}/${AZURE_CONTAINER_NAME}/${PDF_FILENAME}"
 
         mediaStore.getContainer().getBlockBlobReference(PDF_FILENAME).exists()

@@ -56,8 +56,8 @@ class UploadVideoSpec extends GebSpec {
         Document document = metadataStore.getDatabase().getCollection(CONTENT_ITEM_COLLECTION)
                 .find(new BasicDBObject(filename: MP4_FILENAME)).first()
         document != null
-        document.title == TITLE
-        document.category == CATEGORY
+        document.metadata.title == TITLE
+        document.metadata.category == CATEGORY
         document.uri == "${mediaStore.getMediaStorePublicUrlBase()}/${AZURE_CONTAINER_NAME}/${MP4_FILENAME}"
 
         mediaStore.getContainer().getBlockBlobReference(MP4_FILENAME).exists()

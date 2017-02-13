@@ -57,11 +57,13 @@ class BrowseProspectusesSpec extends GebSpec {
     }
 
     def uploadProspectus(File file, String title) {
+
+        def metadata = """{"title":"${title}", "category":"${CATEGORY}", "mediaType":"application/pdf"}"""
+
         HttpResponse<String> response = Unirest.post("http://hub-admin.herokuapp.com/hub-admin/content-items")
                 .header('accept', 'application/json')
-                .field('title', title)
                 .field('file', file)
-                .field('category', CATEGORY)
+                .field('metadata', metadata)
                 .basicAuth(userName, password)
                 .asString()
         assert response.getStatus() == SC_CREATED
