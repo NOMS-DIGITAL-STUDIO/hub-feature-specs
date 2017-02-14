@@ -27,13 +27,13 @@ class MediaStore {
     }
 
     def setupAzurePublicUrlBase() {
-        mediaStorePublicUrlBase = System.getenv('mediaStorePublicUrlBase') ?: 'http://digitalhub2.blob.core.windows.net'
+        mediaStorePublicUrlBase = System.getenv('mediaStorePublicUrlBase') ?: 'http://127.0.0.1:10000'
     }
 
     static setupAzureCloudStorageAccount() {
         String azureConnectionUri = System.getenv('azureBlobStoreConnUri')
         if (!azureConnectionUri) {
-            throw new RuntimeException('azureBlobStoreConnUri environment variable was not set')
+            azureConnectionUri = "AccountName=abc;AccountKey=YWJjCg==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;"
         }
         CloudStorageAccount.parse(azureConnectionUri)
     }
