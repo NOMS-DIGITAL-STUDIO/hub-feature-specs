@@ -2,6 +2,7 @@ package uk.gov.justice.digital.noms.hub
 
 import com.mongodb.BasicDBObject
 import geb.spock.GebSpec
+import groovy.util.logging.Slf4j
 import org.bson.Document
 import uk.gov.justice.digital.noms.hub.util.MediaStore
 import uk.gov.justice.digital.noms.hub.util.MetadataStore
@@ -10,6 +11,7 @@ import static org.awaitility.Awaitility.await
 import static MediaStore.AZURE_CONTAINER_NAME
 import static MetadataStore.CONTENT_ITEM_COLLECTION
 
+@Slf4j
 class UploadVideoSpec extends GebSpec {
 
     private static final String MP4_FILENAME = 'hub-feature-specs-test-video_400KB.mp4'
@@ -29,7 +31,11 @@ class UploadVideoSpec extends GebSpec {
         metadataStore.connect()
         mediaStore.connect()
         setupBasicAuth()
-        adminUiUrl = (System.getenv('HUB_ADMIN_UI_URI') ?: "http://localhost:3000/").replaceFirst('http://', "http://${basicAuth}@")
+
+        adminUiUrl = (System.getenv('HUB_ADMIN_UI_URI') ?: "http://localhost:3000/")
+        log.info("adminUiUrl: ${adminUiUrl}")
+        adminUiUrl = adminUiUrl.replaceFirst('http://', "http://${basicAuth}@")
+
         videoUploadUrl = adminUiUrl + 'video'
         file = new File(this.getClass().getResource("/${MP4_FILENAME}").toURI())
     }
