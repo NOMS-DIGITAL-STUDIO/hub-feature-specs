@@ -29,7 +29,7 @@ class UploadVideoSpec extends GebSpec {
         metadataStore.connect()
         mediaStore.connect()
         setupBasicAuth()
-        adminUiUrl = (System.getenv('adminUiUrl') ?: "http://localhost:3000/").replaceFirst('http://', "http://${basicAuth}@")
+        adminUiUrl = (System.getenv('HUB_ADMIN_UI_URI') ?: "http://localhost:3000/").replaceFirst('http://', "http://${basicAuth}@")
         videoUploadUrl = adminUiUrl + 'video'
         file = new File(this.getClass().getResource("/${MP4_FILENAME}").toURI())
     }

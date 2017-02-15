@@ -27,11 +27,11 @@ class MediaStore {
     }
 
     def setupAzurePublicUrlBase() {
-        mediaStorePublicUrlBase = System.getenv('mediaStorePublicUrlBase') ?: 'http://127.0.0.1:10000'
+        mediaStorePublicUrlBase = System.getenv('AZURE_BLOB_STORE_PUBLIC_URL_BASE') ?: 'http://127.0.0.1:10000'
     }
 
     static setupAzureCloudStorageAccount() {
-        String azureConnectionUri = System.getenv('azureBlobStoreConnUri')
+        String azureConnectionUri = System.getenv('AZURE_BLOB_STORE_CONNECTION_URI')
         if (!azureConnectionUri) {
             azureConnectionUri = "AccountName=abc;AccountKey=YWJjCg==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;"
         }

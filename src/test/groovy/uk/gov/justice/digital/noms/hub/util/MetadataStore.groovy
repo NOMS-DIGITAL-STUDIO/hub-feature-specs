@@ -12,7 +12,7 @@ class MetadataStore {
 
     def connect() {
         MongoClient mongoClient =
-                new MongoClient(new MongoClientURI(System.getenv('mongoDbUrl') ?: 'mongodb://localhost:27017'))
+                new MongoClient(new MongoClientURI(System.getenv('MONGODB_CONNECTION_URI') ?: 'mongodb://localhost:27017'))
         database = mongoClient.getDatabase('hub_metadata')
     }
 
