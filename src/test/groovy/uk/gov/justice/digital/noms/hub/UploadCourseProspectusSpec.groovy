@@ -6,6 +6,7 @@ import groovy.util.logging.Slf4j
 import org.bson.Document
 import uk.gov.justice.digital.noms.hub.util.MediaStore
 import uk.gov.justice.digital.noms.hub.util.MetadataStore
+import uk.gov.justice.digital.noms.hub.util.Hub
 
 import static org.awaitility.Awaitility.await
 import static MediaStore.AZURE_CONTAINER_NAME
@@ -20,26 +21,17 @@ class UploadCourseProspectusSpec extends GebSpec {
     private File file
     private MetadataStore metadataStore = new MetadataStore()
     private MediaStore mediaStore = new MediaStore()
-    private String adminUiUrl
-    private String userName
-    private String password
-    private String basicAuth
+    private Hub theHub = new Hub()
 
     def setup() {
         metadataStore.connect()
         mediaStore.connect()
-        setupBasicAuth()
-
-        adminUiUrl = (System.getenv('HUB_ADMIN_UI_URI') ?: "http://localhost:3000/")
-        log.info("adminUiUrl: ${adminUiUrl}")
-        adminUiUrl = adminUiUrl.replaceFirst('http://', "http://${basicAuth}@")
-
         file = new File(this.getClass().getResource("/${PDF_FILENAME}").toURI())
     }
 
     def 'Upload Course Prospectus'() {
         given: 'that I am on the Upload Prospectus page'
-        go adminUiUrl
+        go theHub.adminUiUri
         verifyThatTheCurrentPageTitleIs('Upload - Prospectus')
 
         and: 'have provided a title'
@@ -68,13 +60,6 @@ class UploadCourseProspectusSpec extends GebSpec {
 
     private void verifyThatTheCurrentPageTitleIs(String aTitle) {
         assert title == aTitle
-    }
-
-    def setupBasicAuth() {
-        basicAuth = System.getenv('BASIC_AUTH') ?: 'user:password'
-        String[] credentials =  basicAuth.split(':')
-        userName = credentials[0];
-        password = credentials[1];
     }
 
     def cleanup() {

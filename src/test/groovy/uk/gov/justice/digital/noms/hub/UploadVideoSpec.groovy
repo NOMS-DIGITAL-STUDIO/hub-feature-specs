@@ -6,6 +6,7 @@ import groovy.util.logging.Slf4j
 import org.bson.Document
 import uk.gov.justice.digital.noms.hub.util.MediaStore
 import uk.gov.justice.digital.noms.hub.util.MetadataStore
+import uk.gov.justice.digital.noms.hub.util.Hub
 
 import static org.awaitility.Awaitility.await
 import static MediaStore.AZURE_CONTAINER_NAME
@@ -21,22 +22,13 @@ class UploadVideoSpec extends GebSpec {
     private File file
     private MetadataStore metadataStore = new MetadataStore()
     private MediaStore mediaStore = new MediaStore()
-    private String adminUiUrl
+    private Hub theHub = new Hub()
     private String videoUploadUrl
-    private String userName
-    private String password
-    private String basicAuth
 
     def setup() {
         metadataStore.connect()
         mediaStore.connect()
-        setupBasicAuth()
-
-        adminUiUrl = (System.getenv('HUB_ADMIN_UI_URI') ?: "http://localhost:3000/")
-        log.info("adminUiUrl: ${adminUiUrl}")
-        adminUiUrl = adminUiUrl.replaceFirst('http://', "http://${basicAuth}@")
-
-        videoUploadUrl = adminUiUrl + 'video'
+        videoUploadUrl = theHub.adminUiUri + 'video'
         file = new File(this.getClass().getResource("/${MP4_FILENAME}").toURI())
     }
 
@@ -71,13 +63,6 @@ class UploadVideoSpec extends GebSpec {
 
     private void verifyThatTheCurrentPageTitleIs(String aTitle) {
         assert title == aTitle
-    }
-
-    def setupBasicAuth() {
-        basicAuth = System.getenv('BASIC_AUTH') ?: 'user:password'
-        String[] credentials =  basicAuth.split(':')
-        userName = credentials[0];
-        password = credentials[1];
     }
 
     def cleanup() {

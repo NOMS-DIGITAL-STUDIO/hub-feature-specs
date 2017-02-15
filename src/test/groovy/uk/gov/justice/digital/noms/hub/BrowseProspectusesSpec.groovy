@@ -6,6 +6,7 @@ import geb.spock.GebSpec
 import groovy.util.logging.Slf4j
 import uk.gov.justice.digital.noms.hub.util.MediaStore
 import uk.gov.justice.digital.noms.hub.util.MetadataStore
+import uk.gov.justice.digital.noms.hub.util.Hub
 
 import static org.apache.http.HttpStatus.SC_CREATED
 import static org.awaitility.Awaitility.await
@@ -22,24 +23,11 @@ class BrowseProspectusesSpec extends GebSpec {
     private File file2
     private MetadataStore metadataStore = new MetadataStore()
     private MediaStore mediaStore = new MediaStore()
-    private String adminUrl
-    private String adminUiUrl
-    private String userName
-    private String password
-    private String basicAuth
+    private Hub theHub = new Hub()
 
     def setup() {
         metadataStore.connect()
         mediaStore.connect()
-        setupBasicAuth()
-
-        adminUrl = (System.getenv('HUB_ADMIN_URI') ?: "http://localhost:8080/")
-        adminUiUrl = (System.getenv('HUB_ADMIN_UI_URI') ?: "http://localhost:3000/")
-        log.info("adminUrl: ${adminUrl}")
-        log.info("adminUiUrl: ${adminUiUrl}")
-        adminUrl = adminUrl.replaceFirst('http://', "http://${basicAuth}@")
-        adminUiUrl = adminUiUrl.replaceFirst('http://', "http://${basicAuth}@")
-
         file1 = new File(this.getClass().getResource("/${PDF_FILENAME_1}").toURI())
         file2 = new File(this.getClass().getResource("/${PDF_FILENAME_2}").toURI())
     }
@@ -54,7 +42,7 @@ class BrowseProspectusesSpec extends GebSpec {
         await().until{ metadataStore.documentIsPresentWithFilename(PDF_FILENAME_2) }
 
         when: 'I am on the Upload Prospectus page'
-        go adminUiUrl
+        go theHub.adminUiUri
         assert title == 'Upload - Prospectus'
 
         then: 'I see the second prospectus at the top of the list'
@@ -67,20 +55,13 @@ class BrowseProspectusesSpec extends GebSpec {
 
         def metadata = """{"title":"${title}", "category":"${CATEGORY}", "mediaType":"application/pdf"}"""
 
-        HttpResponse<String> response = Unirest.post(adminUrl + "/hub-admin/content-items")
+        HttpResponse<String> response = Unirest.post(theHub.adminUri + "/hub-admin/content-items")
                 .header('accept', 'application/json')
                 .field('file', file)
                 .field('metadata', metadata)
-                .basicAuth(userName, password)
+                .basicAuth(theHub.username, theHub.password)
                 .asString()
         assert response.getStatus() == SC_CREATED
-    }
-
-    def setupBasicAuth() {
-        basicAuth = System.getenv('BASIC_AUTH') ?: 'user:password'
-        String[] credentials =  basicAuth.split(':')
-        userName = credentials[0];
-        password = credentials[1];
     }
 
     def cleanup() {
