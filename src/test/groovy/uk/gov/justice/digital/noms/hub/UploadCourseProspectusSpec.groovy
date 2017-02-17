@@ -31,7 +31,7 @@ class UploadCourseProspectusSpec extends GebSpec {
 
     def 'Upload Course Prospectus'() {
         given: 'that I am on the Upload Prospectus page'
-        go theHub.adminUiUri
+        go theHub.adminUiUri + 'prospectus'
         verifyThatTheCurrentPageTitleIs('Upload - Prospectus')
 
         and: 'have provided a title'
