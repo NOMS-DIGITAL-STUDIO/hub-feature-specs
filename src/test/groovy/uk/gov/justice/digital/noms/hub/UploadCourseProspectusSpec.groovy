@@ -1,16 +1,14 @@
 package uk.gov.justice.digital.noms.hub
 
-import com.mongodb.BasicDBObject
 import geb.spock.GebSpec
 import groovy.util.logging.Slf4j
 import org.bson.Document
+import uk.gov.justice.digital.noms.hub.util.Hub
 import uk.gov.justice.digital.noms.hub.util.MediaStore
 import uk.gov.justice.digital.noms.hub.util.MetadataStore
-import uk.gov.justice.digital.noms.hub.util.Hub
 
-import static org.awaitility.Awaitility.await
 import static MediaStore.AZURE_CONTAINER_NAME
-import static MetadataStore.CONTENT_ITEM_COLLECTION
+import static org.awaitility.Awaitility.await
 
 @Slf4j
 class UploadCourseProspectusSpec extends GebSpec {
@@ -48,8 +46,8 @@ class UploadCourseProspectusSpec extends GebSpec {
         await().until{ $('#uploadSuccess').text() == 'Saved successfully' }
 
         then: 'the prospectus is published'
-        Document document = metadataStore.getDatabase().getCollection(CONTENT_ITEM_COLLECTION)
-                                .find(new BasicDBObject(filename: PDF_FILENAME)).first()
+        await().until{ metadataStore.documentIsPresentWithFilename(PDF_FILENAME) }
+        Document document = metadataStore.database.contentItem.find(filename: PDF_FILENAME).first()
         document != null
         document.metadata.title == TITLE
         document.metadata.category == CATEGORY
@@ -63,7 +61,7 @@ class UploadCourseProspectusSpec extends GebSpec {
     }
 
     def cleanup() {
-        metadataStore.documentIsPresentWithFilename PDF_FILENAME
+        metadataStore.removeDocumentsWithFilenames PDF_FILENAME
         mediaStore.removeContentWithFilenames PDF_FILENAME
     }
 

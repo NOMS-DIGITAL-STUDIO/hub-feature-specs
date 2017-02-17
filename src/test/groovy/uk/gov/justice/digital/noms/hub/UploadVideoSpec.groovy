@@ -1,16 +1,14 @@
 package uk.gov.justice.digital.noms.hub
 
-import com.mongodb.BasicDBObject
 import geb.spock.GebSpec
 import groovy.util.logging.Slf4j
 import org.bson.Document
+import uk.gov.justice.digital.noms.hub.util.Hub
 import uk.gov.justice.digital.noms.hub.util.MediaStore
 import uk.gov.justice.digital.noms.hub.util.MetadataStore
-import uk.gov.justice.digital.noms.hub.util.Hub
 
-import static org.awaitility.Awaitility.await
 import static MediaStore.AZURE_CONTAINER_NAME
-import static MetadataStore.CONTENT_ITEM_COLLECTION
+import static org.awaitility.Awaitility.await
 
 @Slf4j
 class UploadVideoSpec extends GebSpec {
@@ -51,8 +49,8 @@ class UploadVideoSpec extends GebSpec {
         await().until{ $('#uploadSuccess').text() == 'Saved successfully' }
 
         then: 'the video is published'
-        Document document = metadataStore.getDatabase().getCollection(CONTENT_ITEM_COLLECTION)
-                .find(new BasicDBObject(filename: MP4_FILENAME)).first()
+        await().until{ metadataStore.documentIsPresentWithFilename(MP4_FILENAME) }
+        Document document = metadataStore.database.contentItem.find(filename: MP4_FILENAME).first()
         document != null
         document.metadata.title == TITLE
         document.metadata.category == CATEGORY
@@ -66,7 +64,7 @@ class UploadVideoSpec extends GebSpec {
     }
 
     def cleanup() {
-        metadataStore.documentIsPresentWithFilename MP4_FILENAME
+        metadataStore.removeDocumentsWithFilenames MP4_FILENAME
         mediaStore.removeContentWithFilenames MP4_FILENAME
     }
 

@@ -34,6 +34,7 @@ dependencies {
     testCompile 'org.apache.httpcomponents:httpclient:4.5.2'
     testCompile 'com.mashape.unirest:unirest-java:1.4.9'
     testCompile 'org.awaitility:awaitility-groovy:2.0.0'
+    testCompile 'com.gmongo:gmongo:1.5'
 }
 
 task wrapper(type: Wrapper) {
