@@ -40,12 +40,12 @@ class ListAllContentSpec extends GebSpec {
         then: 'I see the second file uploaded at the top of the list'
         assert $("#contentItem0-title").text() == VIDEO_TITLE
         assert $("#contentItem0-content-type").text() == VIDEO_CONTENT_TYPE.capitalize()
-        assert $("#contentItem0-timestamp").text() == '10:01 on 02/01/2017'
+        assert $("#contentItem0-timestamp").text() == '10:01 on 02/01/2117'
 
         and: 'I see the first file uploaded second in the list'
         assert $("#contentItem1-title").text() == PROSPECTUS_TITLE
         assert $("#contentItem1-content-type").text() == PROSPECTUS_CONTENT_TYPE.capitalize()
-        assert $("#contentItem1-timestamp").text() == '10:01 on 01/01/2017'
+        assert $("#contentItem1-timestamp").text() == '10:01 on 01/01/2117'
 
     }
 

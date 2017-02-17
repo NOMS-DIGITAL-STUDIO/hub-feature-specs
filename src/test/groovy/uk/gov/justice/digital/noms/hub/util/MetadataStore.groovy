@@ -15,7 +15,7 @@ class MetadataStore {
         MongoClientURI mongoUri = new MongoClientURI(System.getenv('MONGODB_CONNECTION_URI') ?: 'mongodb://localhost:27017')
         mongo = new GMongoClient(mongoUri)
         database = mongo.getDB("hub_metadata")
-        aDate = Date.parse("yyyy-MM-dd'T'HH:mm:ss'Z'", '2017-01-01T10:00:00Z')
+        aDate = Date.parse("yyyy-MM-dd'T'HH:mm:ss'Z'", '2117-01-01T10:00:00Z')
     }
 
     def documentIsPresentWithFilename = {
