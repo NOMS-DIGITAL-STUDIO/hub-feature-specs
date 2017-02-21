@@ -11,10 +11,10 @@ import static MediaStore.AZURE_CONTAINER_NAME
 import static org.awaitility.Awaitility.await
 
 @Slf4j
-class UploadCourseProspectusSpec extends GebSpec {
-    private static final String PDF_FILENAME = 'hub-feature-specs-test-prospectus.pdf'
-    private static final String TITLE = 'hub-feature-specs:Upload Course Prospectus'
-    private static final String CATEGORY = 'Science'
+class UploadEBookSpec extends GebSpec {
+    private static final String PDF_FILENAME = 'hub-feature-specs-test-ebook.pdf'
+    private static final String TITLE = 'hub-feature-specs:Upload eBook'
+    private static final String DESCRIPTION = 'A description'
 
     private File file
     private MetadataStore metadataStore = new MetadataStore()
@@ -27,18 +27,18 @@ class UploadCourseProspectusSpec extends GebSpec {
         file = new File(this.getClass().getResource("/${PDF_FILENAME}").toURI())
     }
 
-    def 'Upload Course Prospectus'() {
-        given: 'that I am on the Upload Prospectus page'
-        go theHub.adminUiUri + 'prospectus'
-        verifyThatTheCurrentPageTitleIs('Upload - Prospectus')
+    def 'Upload eBook'() {
+        given: 'that I am on the Upload eBook page'
+        go theHub.adminUiUri + 'book'
+        verifyThatTheCurrentPageTitleIs('Upload - eBook')
 
         and: 'have provided a title'
         $('form').title = TITLE
 
-        and: 'picked a subject'
-        $('form').category = CATEGORY
+        and: 'have provided a description'
+        $('form').description = DESCRIPTION
 
-        and: 'and chosen a prospectus'
+        and: 'and chosen an eBook'
         $('form').mainFile = file.absolutePath
 
         when: 'I click the Save button'
@@ -50,7 +50,7 @@ class UploadCourseProspectusSpec extends GebSpec {
         Document document = metadataStore.database.contentItem.find(filename: PDF_FILENAME).first()
         document != null
         document.metadata.title == TITLE
-        document.metadata.category == CATEGORY
+        document.metadata.description == DESCRIPTION
         document.uri == "${mediaStore.getMediaStorePublicUrlBase()}/${AZURE_CONTAINER_NAME}/${PDF_FILENAME}"
 
         mediaStore.getContainer().getBlockBlobReference(PDF_FILENAME).exists()
