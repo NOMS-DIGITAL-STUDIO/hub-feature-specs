@@ -59,6 +59,18 @@ class UploadVideoSpec extends GebSpec {
         mediaStore.getContainer().getBlockBlobReference(MP4_FILENAME).exists()
     }
 
+    def 'Navigate back to the All Content list page'() {
+        given: 'that I am on the Upload Video page'
+        go theHub.adminUiUri + 'video'
+        verifyThatTheCurrentPageTitleIs('Upload - Video')
+
+        when: 'I click the All Content link'
+        $('#all-content').click()
+
+        then: 'I am taken to the All Content list page'
+        verifyThatTheCurrentPageTitleIs('All Content')
+    }
+
     private void verifyThatTheCurrentPageTitleIs(String aTitle) {
         assert title == aTitle
     }

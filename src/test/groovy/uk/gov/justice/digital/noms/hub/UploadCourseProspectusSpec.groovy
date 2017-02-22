@@ -56,6 +56,18 @@ class UploadCourseProspectusSpec extends GebSpec {
         mediaStore.getContainer().getBlockBlobReference(PDF_FILENAME).exists()
     }
 
+    def 'Navigate back to the All Content list page'() {
+        given: 'that I am on the Upload Prospectus page'
+        go theHub.adminUiUri + 'prospectus'
+        verifyThatTheCurrentPageTitleIs('Upload - Prospectus')
+
+        when: 'I click the All Content link'
+        $('#all-content').click()
+
+        then: 'I am taken to the All Content list page'
+        verifyThatTheCurrentPageTitleIs('All Content')
+    }
+
     private void verifyThatTheCurrentPageTitleIs(String aTitle) {
         assert title == aTitle
     }
