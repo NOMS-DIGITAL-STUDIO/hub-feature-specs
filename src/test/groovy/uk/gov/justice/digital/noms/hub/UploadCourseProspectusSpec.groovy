@@ -39,7 +39,7 @@ class UploadCourseProspectusSpec extends GebSpec {
         $('form').category = CATEGORY
 
         and: 'and chosen a prospectus'
-        $('form').mainFile = file.absolutePath
+        $('form').main = file.absolutePath
 
         when: 'I click the Save button'
         $('#upload').click()

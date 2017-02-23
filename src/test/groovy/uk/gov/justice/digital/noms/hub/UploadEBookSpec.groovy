@@ -39,7 +39,7 @@ class UploadEBookSpec extends GebSpec {
         $('form').description = DESCRIPTION
 
         and: 'and chosen an eBook'
-        $('form').mainFile = file.absolutePath
+        $('form').main = file.absolutePath
 
         when: 'I click the Save button'
         $('#upload').click()
