@@ -51,7 +51,7 @@ class UploadCourseProspectusSpec extends GebSpec {
         document != null
         document.metadata.title == TITLE
         document.metadata.category == CATEGORY
-        document.uri == "${mediaStore.getMediaStorePublicUrlBase()}/${AZURE_CONTAINER_NAME}/${PDF_FILENAME}"
+        document.files.main == "${mediaStore.getMediaStorePublicUrlBase()}/${AZURE_CONTAINER_NAME}/${PDF_FILENAME}"
 
         mediaStore.getContainer().getBlockBlobReference(PDF_FILENAME).exists()
     }
