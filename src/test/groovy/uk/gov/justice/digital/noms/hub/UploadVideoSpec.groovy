@@ -14,10 +14,12 @@ import static org.awaitility.Awaitility.await
 class UploadVideoSpec extends GebSpec {
 
     private static final String MP4_FILENAME = 'hub-feature-specs-test-video_400KB.mp4'
+    private static final String JPG_FILENAME = 'hub-feature-specs-test-image.jpg'
     private static final String TITLE = 'hub-feature-specs:Upload Video'
     private static final String CATEGORY = 'Science'
 
     private File file
+    private File file2
     private MetadataStore metadataStore = new MetadataStore()
     private MediaStore mediaStore = new MediaStore()
     private Hub theHub = new Hub()
@@ -28,6 +30,7 @@ class UploadVideoSpec extends GebSpec {
         mediaStore.connect()
         videoUploadUrl = theHub.adminUiUri + 'video'
         file = new File(this.getClass().getResource("/${MP4_FILENAME}").toURI())
+        file2 = new File(this.getClass().getResource("/${JPG_FILENAME}").toURI())
     }
 
     def 'Upload video'() {
@@ -42,7 +45,10 @@ class UploadVideoSpec extends GebSpec {
         $('form').category = CATEGORY
 
         and: 'and chosen a video'
-        $('form').mainFile = file.absolutePath
+        $('form').main = file.absolutePath
+
+        and: 'and chosen a thumbnail'
+        $('form').thumbnail = file2.absolutePath
 
         when: 'I click the Save button'
         $('#upload').click()
@@ -54,7 +60,7 @@ class UploadVideoSpec extends GebSpec {
         document != null
         document.metadata.title == TITLE
         document.metadata.category == CATEGORY
-        document.uri == "${mediaStore.getMediaStorePublicUrlBase()}/${AZURE_CONTAINER_NAME}/${MP4_FILENAME}"
+        document.files.main == "${mediaStore.getMediaStorePublicUrlBase()}/${AZURE_CONTAINER_NAME}/${MP4_FILENAME}"
 
         mediaStore.getContainer().getBlockBlobReference(MP4_FILENAME).exists()
     }
