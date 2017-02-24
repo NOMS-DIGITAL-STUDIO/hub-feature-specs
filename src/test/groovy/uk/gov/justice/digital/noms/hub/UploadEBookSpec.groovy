@@ -13,10 +13,12 @@ import static org.awaitility.Awaitility.await
 @Slf4j
 class UploadEBookSpec extends GebSpec {
     private static final String PDF_FILENAME = 'hub-feature-specs-test-ebook.pdf'
+    private static final String JPG_FILENAME = 'hub-feature-specs-test-image.jpg'
     private static final String TITLE = 'hub-feature-specs:Upload eBook'
     private static final String DESCRIPTION = 'A description'
 
     private File file
+    private File file2
     private MetadataStore metadataStore = new MetadataStore()
     private MediaStore mediaStore = new MediaStore()
     private Hub theHub = new Hub()
@@ -25,6 +27,7 @@ class UploadEBookSpec extends GebSpec {
         metadataStore.connect()
         mediaStore.connect()
         file = new File(this.getClass().getResource("/${PDF_FILENAME}").toURI())
+        file2 = new File(this.getClass().getResource("/${JPG_FILENAME}").toURI())
     }
 
     def 'Upload eBook'() {
@@ -41,6 +44,9 @@ class UploadEBookSpec extends GebSpec {
         and: 'and chosen an eBook'
         $('form').main = file.absolutePath
 
+        and: 'and chosen a thumbnail'
+        $('form').thumbnail = file2.absolutePath
+
         when: 'I click the Save button'
         $('#upload').click()
         await().until{ $('#uploadSuccess').text() == 'Saved successfully' }
@@ -52,8 +58,10 @@ class UploadEBookSpec extends GebSpec {
         document.metadata.title == TITLE
         document.metadata.description == DESCRIPTION
         document.files.main == "${mediaStore.getMediaStorePublicUrlBase()}/${AZURE_CONTAINER_NAME}/${PDF_FILENAME}"
+        document.files.thumbnail == "${mediaStore.getMediaStorePublicUrlBase()}/${AZURE_CONTAINER_NAME}/${JPG_FILENAME}"
 
         mediaStore.getContainer().getBlockBlobReference(PDF_FILENAME).exists()
+        mediaStore.getContainer().getBlockBlobReference(JPG_FILENAME).exists()
     }
 
     def 'Navigate back to the All Content list page'() {
@@ -75,6 +83,7 @@ class UploadEBookSpec extends GebSpec {
     def cleanup() {
         metadataStore.removeDocumentsWithFilenames PDF_FILENAME
         mediaStore.removeContentWithFilenames PDF_FILENAME
+        mediaStore.removeContentWithFilenames JPG_FILENAME
     }
 
 }
