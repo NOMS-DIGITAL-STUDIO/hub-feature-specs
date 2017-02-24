@@ -22,12 +22,16 @@ class UploadEBookSpec extends GebSpec {
     private MetadataStore metadataStore = new MetadataStore()
     private MediaStore mediaStore = new MediaStore()
     private Hub theHub = new Hub()
+    private String contentStoreUri
 
     def setup() {
         metadataStore.connect()
         mediaStore.connect()
+
         file = new File(this.getClass().getResource("/${PDF_FILENAME}").toURI())
         file2 = new File(this.getClass().getResource("/${JPG_FILENAME}").toURI())
+
+        contentStoreUri = "${mediaStore.getMediaStorePublicUrlBase()}/${AZURE_CONTAINER_NAME}/"
     }
 
     def 'Upload eBook'() {
@@ -49,19 +53,22 @@ class UploadEBookSpec extends GebSpec {
 
         when: 'I click the Save button'
         $('#upload').click()
-        await().until{ $('#uploadSuccess').text() == 'Saved successfully' }
+        await().until { $('#uploadSuccess').text() == 'Saved successfully' }
 
-        then: 'the prospectus is published'
-        await().until{ metadataStore.documentIsPresentWithFilename(PDF_FILENAME) }
+        then: 'the ebook and thumbnail are published'
+        await().until { metadataStore.documentIsPresentWithFilename(PDF_FILENAME) }
         Document document = metadataStore.database.contentItem.find(filename: PDF_FILENAME).first()
+
         document != null
         document.metadata.title == TITLE
         document.metadata.description == DESCRIPTION
-        document.files.main == "${mediaStore.getMediaStorePublicUrlBase()}/${AZURE_CONTAINER_NAME}/${PDF_FILENAME}"
-        document.files.thumbnail == "${mediaStore.getMediaStorePublicUrlBase()}/${AZURE_CONTAINER_NAME}/${JPG_FILENAME}"
 
-        mediaStore.getContainer().getBlockBlobReference(PDF_FILENAME).exists()
-        mediaStore.getContainer().getBlockBlobReference(JPG_FILENAME).exists()
+        document.files.main == "${contentStoreUri}${PDF_FILENAME}"
+        document.files.thumbnail == "${contentStoreUri}${JPG_FILENAME}"
+
+        [PDF_FILENAME, JPG_FILENAME].each {
+            mediaStore.getContainer().getBlockBlobReference(it).exists()
+        }
     }
 
     def 'Navigate back to the All Content list page'() {
@@ -82,8 +89,9 @@ class UploadEBookSpec extends GebSpec {
 
     def cleanup() {
         metadataStore.removeDocumentsWithFilenames PDF_FILENAME
-        mediaStore.removeContentWithFilenames PDF_FILENAME
-        mediaStore.removeContentWithFilenames JPG_FILENAME
-    }
 
+        [PDF_FILENAME, JPG_FILENAME].each {
+            mediaStore.removeContentWithFilenames it
+        }
+    }
 }

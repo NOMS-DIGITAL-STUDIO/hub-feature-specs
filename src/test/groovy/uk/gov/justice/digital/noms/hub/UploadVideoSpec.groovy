@@ -23,19 +23,21 @@ class UploadVideoSpec extends GebSpec {
     private MetadataStore metadataStore = new MetadataStore()
     private MediaStore mediaStore = new MediaStore()
     private Hub theHub = new Hub()
-    private String videoUploadUrl
+    private String contentStoreUri
 
     def setup() {
         metadataStore.connect()
         mediaStore.connect()
-        videoUploadUrl = theHub.adminUiUri + 'video'
+
         file = new File(this.getClass().getResource("/${MP4_FILENAME}").toURI())
         file2 = new File(this.getClass().getResource("/${JPG_FILENAME}").toURI())
+
+        contentStoreUri = "${mediaStore.getMediaStorePublicUrlBase()}/${AZURE_CONTAINER_NAME}/"
     }
 
     def 'Upload video'() {
         given: 'that I am on the Upload Video page'
-        go videoUploadUrl
+        go theHub.adminUiUri + 'video'
         verifyThatTheCurrentPageTitleIs('Upload - Video')
 
         and: 'have provided a title'
@@ -57,15 +59,17 @@ class UploadVideoSpec extends GebSpec {
         then: 'the video and thumbnail are published'
         await().until{ metadataStore.documentIsPresentWithFilename(MP4_FILENAME) }
         Document document = metadataStore.database.contentItem.find(filename: MP4_FILENAME).first()
+
         document != null
         document.metadata.title == TITLE
         document.metadata.category == CATEGORY
-        document.files.main == "${mediaStore.getMediaStorePublicUrlBase()}/${AZURE_CONTAINER_NAME}/${MP4_FILENAME}"
-        document.files.thumbnail == "${mediaStore.getMediaStorePublicUrlBase()}/${AZURE_CONTAINER_NAME}/${JPG_FILENAME}"
 
-        mediaStore.getContainer().getBlockBlobReference(MP4_FILENAME).exists()
-        mediaStore.getContainer().getBlockBlobReference(JPG_FILENAME).exists()
+        document.files.main == "${contentStoreUri}${MP4_FILENAME}"
+        document.files.thumbnail == "${contentStoreUri}${JPG_FILENAME}"
 
+        [MP4_FILENAME, JPG_FILENAME].each {
+            mediaStore.getContainer().getBlockBlobReference(it).exists()
+        }
     }
 
     def 'Navigate back to the All Content list page'() {
@@ -86,8 +90,10 @@ class UploadVideoSpec extends GebSpec {
 
     def cleanup() {
         metadataStore.removeDocumentsWithFilenames MP4_FILENAME
-        mediaStore.removeContentWithFilenames MP4_FILENAME
-        mediaStore.removeContentWithFilenames JPG_FILENAME
+
+        [MP4_FILENAME, JPG_FILENAME].each {
+            mediaStore.removeContentWithFilenames it
+        }
     }
 
 
