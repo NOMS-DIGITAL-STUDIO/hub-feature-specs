@@ -32,7 +32,7 @@ class UploadRadioSpec extends GebSpec {
         contentStoreUri = "${mediaStore.getMediaStorePublicUrlBase()}/${AZURE_CONTAINER_NAME}/"
     }
 
-    def 'Upload video'() {
+    def 'Upload radio'() {
         given: 'that I am on the Upload Radio page'
         go theHub.adminUiUri + 'radio'
         verifyThatTheCurrentPageTitleIs('Upload - Radio')
@@ -41,7 +41,7 @@ class UploadRadioSpec extends GebSpec {
         $('form').title = TITLE
 
         and: 'picked a channel'
-        $('form').category = CHANNEL
+        $('form').channel = CHANNEL
 
         and: 'and chosen a radio show'
         $('form').main = file.absolutePath
